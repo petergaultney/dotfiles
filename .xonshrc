@@ -1,0 +1,153 @@
+# source ~/work/obsidian-work/work/xonshrc.md
+#
+from pathlib import Path
+import os
+
+# $PYENV_ROOT = "$HOME/.pyenv"
+# $PATH.insert(0, $PYENV_ROOT + '/bin')
+# xontrib load pyenv
+
+# if 'PYENV_VERSION' in ${...}:
+#    del $PYENV_VERSION
+
+if '/opt/homebrew/bin' not in $PATH and os.path.exists('/opt/homebrew/bin'):
+    # arm64 homebrew
+    $PATH.insert(0, '/opt/homebrew/bin')
+
+# $PATH = [pth for pth in $PATH if 'pyenv/versions' not in str(pth)]
+
+
+
+_path_dirs = [
+    '~/sw/bin',
+    '~/.local/share/mise/shims',
+    '~/.local/bin',
+    '~/.cargo/bin',
+    "~/Applications/Docker.app/Contents/Resources/bin",
+    '/usr/local/bin',
+]
+_resolved = [os.path.expanduser(pth) for pth in _path_dirs]
+
+$PATH = [pth for pth in $PATH if pth not in _resolved]
+for pth in reversed(_resolved):
+    $PATH.insert(0, pth)
+
+# source-bash "/Users/peter.gaultney/.sdkman/bin/sdkman-init.sh"
+
+
+# ls
+
+aliases['la'] = 'ls -la'
+aliases['ll'] = 'ls -l'
+aliases['lh'] = 'ls -lah'
+
+# git
+
+aliases['gs'] = 'git status'
+aliases['gca'] = 'git commit -a '
+aliases['gcma'] = 'git commit -a -m '
+aliases['gsw'] = 'git switch '
+aliases['gpf'] = 'git push --force-with-lease '
+
+
+def _gd():
+    with ${...}.swap(GIT_EXTERNAL_DIFF='difft'):
+	git diff
+
+aliases['gd'] = _gd
+
+
+# Emacs
+
+# emacs
+aliases['edaemon'] = 'emacs --daemon'
+aliases['e'] = 'emacsclient -t '
+aliases['ea'] = "emacsclient --eval '(abort-recursive-edit)'"
+aliases['fix-emacs'] = "emacsclient --eval '(abort-recursive-edit)'"
+$EDITOR = 'emacsclient -t'
+
+def edaemon_pid() -> int:
+    # find emacs, but not ripgrep searching for emacs.
+    pid = $(ps aux | rg -i 'emacs --.*daemon' | rg -v rg | awk '{print $2}').strip('\n')
+    if not pid:
+        raise ValueError('Could not find emacs daemon pid!')
+    return int(pid)
+
+def edaemon_interrupt():
+    kill -SIGUSR2 @(edaemon_pid())
+
+def kill_edaemon():
+    kill -9 @(edaemon_pid())
+
+aliases['ked'] = kill_edaemon
+
+# Python/venvs
+
+$PIPENV_VENV_IN_PROJECT = '1'
+
+aliases['rr'] = 'poetry run'
+aliases['pr'] = 'pipenv run'
+aliases['pis'] = 'poetry install --sync --all-extras'
+aliases['pylsp-install'] = 'pipenv run pip install python-lsp-server pylsp-mypy pyls-isort python-lsp-black'
+
+aliases['ptx'] = 'uv run pytest -n auto --cov --cov-report=html'
+aliases['vv'] = 'uv run'
+aliases['us'] = 'uv sync'
+
+def run_dmypy():
+    uv run dmypy run -- . --config-file pyproject.toml
+
+aliases['mst'] = run_dmypy
+aliases['pst'] = 'uv run pytest tests'
+aliases['slack'] = 'open -a Slack'
+aliases['ohslack'] = 'killall Slack; open -a Slack'
+
+
+# resources
+
+def ulimit_n(n):
+    import resource
+    resource.setrlimit(resource.RLIMIT_NOFILE, (n, resource.getrlimit(resource.RLIMIT_NOFILE)[1]))
+
+
+# work stuff
+$JAVA_TOOL_OPTIONS = '-Djavax.net.ssl.trustStore=/etc/java_ca_certs'
+$THDS_CORE_LOG_LEVELS_FILE = os.path.expanduser('~/work/.thds_log_levels.txt')
+
+aliases['adu'] = 'poetry run adls-download-uri '
+aliases['adu-clip'] = 'poetry run adls-download-uri $(pbpaste)'
+
+# source-bash "$HOME/.sdkman/bin/sdkman-init.sh"
+
+
+def cd_repo_root():
+    cwd = Path(os.getcwd())
+    while not (cwd / '.git').exists() and cwd != Path('/'):
+        cwd = cwd.parent
+    if cwd == Path('/'):
+        print('No git repo found')
+    else:
+        os.chdir(cwd)
+
+
+def mono(args):
+    orig_dir = os.getcwd()
+    cd_repo_root()
+    try:
+        @(['poetry', 'run', 'mono', *args])
+    finally:
+        os.chdir(orig_dir)
+
+
+aliases['mon'] = mono
+# fancy xontribs
+
+
+# xontrib load z
+
+xontrib load fish_completer
+# xontrib load direnv
+xontrib load abbrevs
+
+execx($(~/.local/bin/mise activate xonsh))
+# source ~/.config/xonsh/*.xsh
