@@ -106,18 +106,49 @@ local function extend_table(target, source)
   return target  -- Return the target for chaining if desired
 end
 
+-- Simple string hash function (djb2 algorithm)
+local function hash_string(str)
+    local hash = 5381
+    for i = 1, #str do
+        hash = ((hash * 33) + string.byte(str, i)) % 2^32
+    end
+    return hash
+end
+
+local high_contrast_colors = {
+    "#FF5555", -- Bright Red
+    "#50FA7B", -- Bright Green
+    "#F1FA8C", -- Bright Yellow
+    "#BD93F9", -- Bright Purple
+    "#FF79C6", -- Bright Pink
+    "#8BE9FD", -- Bright Cyan
+    "#FFB86C", -- Bright Orange
+    "#FF92DF", -- Light Pink
+    "#9AEDFE", -- Light Blue
+    "#5AF78E", -- Light Green
+    "#F4F99D", -- Light Yellow
+    "#CAA9FA", -- Light Purple
+    "#FF6E67", -- Light Red
+    "#ADEDC8", -- Soft Green
+    "#FEA44D"  -- Soft Orange
+}
+
+-- Get a deterministic color for a string
+local function get_deterministic_color(str)
+    local hash = hash_string(str)
+    local index = (hash % #high_contrast_colors) + 1
+    return high_contrast_colors[index]
+end
+
 -- Process color mapping (declarative approach)
 local process_colors = {
   emacs = "orange",
   emacsclient = "orange",
-  git = "purple"
+  git = "#bb55ff" -- pretty purple
 }
 
 -- Directory prefix color mapping (declarative approach)
 local dir_name_colors = {
-    ['mono-1'] = 'red',
-    ['mono-2'] = 'white',
-    ['mono-3'] = 'blue',
     ["apps"] = "cyan",
     ["libs"] = "yellow",
     ["mops"] = 'green',
@@ -142,7 +173,7 @@ local function format_colored_directory(dir_path)
     if dir_name_colors[part] then
       extend_table(result, txt_fg_fmt(dir_name_colors[part], part))
     else
-      table.insert(result, {Text = part})
+        extend_table(result, txt_fg_fmt(get_deterministic_color(part), part))
     end
   end
 
@@ -262,5 +293,8 @@ config.window_background_opacity = 0.85
 config.macos_window_background_blur = 20
 config.window_decorations = "RESIZE"
 config.tab_bar_at_bottom = true
+config.window_frame = {
+  font = wezterm.font('JetBrains Mono', { size = 14 }),
+}
 
 return config
