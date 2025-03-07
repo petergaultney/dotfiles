@@ -1,6 +1,35 @@
 local wezterm = require 'wezterm'
 local act = wezterm.action
 
+function hex_to_ansi(hex_color)
+    -- Convert hex color #RRGGBB to RGB components
+    local r, g, b = hex_color:match("#(%x%x)(%x%x)(%x%x)")
+
+    if r and g and b then
+        -- Convert hex to decimal
+        r = tonumber(r, 16)
+        g = tonumber(g, 16)
+        b = tonumber(b, 16)
+
+        -- Create ANSI escape sequence for 24-bit color
+        return string.format("\x1b[38;2;%d;%d;%dm", r, g, b)
+    else
+        -- Return empty string if invalid format
+        return ""
+    end
+end
+
+function colorize(text, color)
+    local ansi_color = hex_to_ansi(color)
+    local reset = "\x1b[0m"
+
+    if ansi_color ~= "" then
+        return ansi_color .. text .. reset
+    else
+        return text
+    end
+end
+
 function get_appearance()
     if wezterm.gui then
         return wezterm.gui.get_appearance()
@@ -51,7 +80,7 @@ function format_directory_path(file_path)
 
     -- Check if it's a string and has a proper format
     if type(cwd) ~= "string" then
-        return "unknown"
+        return ""
     end
 
     -- For file:// URLs (which WezTerm often uses)
@@ -136,18 +165,28 @@ local color_set = {
     "#FF5555", -- Bright Red
     "#50FA7B", -- Bright Green
     "#F1FA8C", -- Bright Yellow
-    "#BD93F9", -- Bright Purple
+    "#A66BE0", -- Bright Purple
     "#FF79C6", -- Bright Pink
     "#8BE9FD", -- Bright Cyan
     "#FFB86C", -- Bright Orange
-    "#FF92DF", -- Light Pink
     "#9AEDFE", -- Light Blue
     "#5AF78E", -- Light Green
     "#F4F99D", -- Light Yellow
     "#CAA9FA", -- Light Purple
     "#FF6E67", -- Light Red
     "#ADEDC8", -- Soft Green
-    "#FEA44D"  -- Soft Orange
+    "#FEA44D", -- Soft Orange
+
+    -- Additional colors
+    "#F07178", -- Coral
+    "#00B1B3", -- Teal
+    "#E6DB74", -- Muted Yellow
+    "#7DCFFF", -- Sky Blue
+    "#D8A0DF", -- Lavender
+    "#36C2C2", -- Aqua
+    "#FF9E64", -- Peach
+    "#85DACC", -- Mint
+    "#E3CF65"  -- Gold
 }
 
 -- Get a deterministic color for a string
@@ -199,12 +238,12 @@ local function format_colored_directory(dir_path)
 end
 
 
-local PROCESSES_TO_NOT_PUT_ON_TAB_TITLE = make_set({ 'xonsh', 'mise', 'bash', 'zsh', 'fish' })
+local PROCESSES_TO_NOT_PUT_ON_TAB_TITLE = make_set({ 'xonsh', 'mise', 'bash', 'zsh', 'fish', 'starship' })
 
 
 local function format_tab_title(tab, tabs, panes, config, hover, max_width)
     local process = tab.active_pane.foreground_process_name
-    local dir = "unknown"
+    local dir = "<debug?>"
 
     -- Extract just the process name without path
     process = process:gsub("^.*/([^/]+)$", "%1")
@@ -342,11 +381,19 @@ config.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
 --     end
 -- end
 
+function print_colors()
+    for i, color in ipairs(color_set) do
+        wezterm.log_info('color ' .. tostring(i) .. ' ' .. colorize(color, color))
+    end
+end
+
 function switch_themes()
     config.color_scheme = scheme_for_appearance(get_appearance())
+    print_colors()
     -- add_theme_colors_to_set()
 end
 
 wezterm.on('window-config-reloaded', switch_themes)
+wezterm.print_colors = print_colors
 
 return config
