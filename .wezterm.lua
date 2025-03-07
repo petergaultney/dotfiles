@@ -1,7 +1,5 @@
-
 local wezterm = require 'wezterm'
 local act = wezterm.action
-
 
 function get_appearance()
     if wezterm.gui then
@@ -22,6 +20,14 @@ function shellexpand(path)
     local home = os.getenv("HOME")
     fullpath, n_subs = path:gsub("^~", home)
     return fullpath
+end
+
+function make_set(list)  -- oof Lua is verbose sometimes
+  local set = {}
+  for _, v in ipairs(list) do
+    set[v] = true
+  end
+  return set
 end
 
 local function read_paths_from_file(file_path)
@@ -126,7 +132,7 @@ local function hash_string(str)
     return hash
 end
 
-local high_contrast_colors = {
+local color_set = {
     "#FF5555", -- Bright Red
     "#50FA7B", -- Bright Green
     "#F1FA8C", -- Bright Yellow
@@ -147,14 +153,15 @@ local high_contrast_colors = {
 -- Get a deterministic color for a string
 local function get_deterministic_color(str)
     local hash = hash_string(str)
-    local index = (hash % #high_contrast_colors) + 1
-    return high_contrast_colors[index]
+    local index = (hash % #color_set) + 1
+    return color_set[index]
 end
 
 -- Process color mapping (declarative approach)
 local process_colors = {
     emacs = "orange",
     emacsclient = "orange",
+    Emacs = 'orange',
     git = "#bb55ff" -- pretty purple
 }
 
@@ -192,6 +199,9 @@ local function format_colored_directory(dir_path)
 end
 
 
+local PROCESSES_TO_NOT_PUT_ON_TAB_TITLE = make_set({ 'xonsh', 'mise', 'bash', 'zsh', 'fish' })
+
+
 local function format_tab_title(tab, tabs, panes, config, hover, max_width)
     local process = tab.active_pane.foreground_process_name
     local dir = "unknown"
@@ -199,24 +209,26 @@ local function format_tab_title(tab, tabs, panes, config, hover, max_width)
     -- Extract just the process name without path
     process = process:gsub("^.*/([^/]+)$", "%1")
 
-    if process == "mise" or process == "bash" then
-        process = "xonsh"
+    if PROCESSES_TO_NOT_PUT_ON_TAB_TITLE[process] then
+        process = nil
+    end
+
+    local tab_format_items = { { Text = tostring(tab.tab_index + 1) .. " | "} }
+
+    if process then
+        -- Apply process coloring based on lookup table
+        if process_colors[process] then
+            extend_table(tab_format_items, txt_fg_fmt(process_colors[process], process))
+        else
+            table.insert(tab_format_items, { Text = process })
+        end
+        table.insert(tab_format_items, { Text = ": " })
     end
 
     if tab.active_pane and tab.active_pane.current_working_dir then
         dir = format_directory_path(tab.active_pane.current_working_dir.path)
     end
 
-    local tab_format_items = { { Text = tostring(tab.tab_index + 1) .. " | "} }
-
-    -- Apply process coloring based on lookup table
-    if process_colors[process] then
-        extend_table(tab_format_items, txt_fg_fmt(process_colors[process], process))
-    else
-        table.insert(tab_format_items, { Text = process })
-    end
-
-    table.insert(tab_format_items, { Text = ": " })
 
     -- Apply directory coloring
     extend_table(tab_format_items, format_colored_directory(dir))
@@ -307,5 +319,34 @@ config.tab_bar_at_bottom = true
 config.window_frame = {
     font = wezterm.font('JetBrains Mono', { size = 14 }),
 }
+config.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
+-- no ligatures, please
+
+
+-- function add_theme_colors_to_set()
+--     -- Get the default colors (based on your selected color scheme)
+--     local colors = wezterm.color.get_builtin_schemes()[config.color_scheme]
+--     local bad_colors = { black = 1, white = 1, ['#FFFFFF'] = 1, ['#000000'] = 1, }
+
+--     -- Store the ANSI colors in our global table
+--     if colors and colors.ansi then
+--         bad_colors[colors.foreground] = 1
+--         bad_colors[colors.background] = 1
+--         wezterm.log_info("ANSI colors loaded into color_set table:")
+--         for i, color in ipairs(colors.ansi) do
+--             wezterm.log_info(string.format("ansi[%d]: %s", i, color))
+--             if not bad_colors[color] and not color_set[color] then
+--                 table.insert(color_set, 1, color)
+--             end
+--         end
+--     end
+-- end
+
+function switch_themes()
+    config.color_scheme = scheme_for_appearance(get_appearance())
+    -- add_theme_colors_to_set()
+end
+
+wezterm.on('window-config-reloaded', switch_themes)
 
 return config
