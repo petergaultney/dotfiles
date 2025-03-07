@@ -4,66 +4,81 @@ local act = wezterm.action
 
 
 function get_appearance()
-  if wezterm.gui then
-    return wezterm.gui.get_appearance()
-  end
-  return 'Dark'
+    if wezterm.gui then
+        return wezterm.gui.get_appearance()
+    end
+    return 'Dark'
 end
 
 function scheme_for_appearance(appearance)
-  if appearance:find 'Dark' then
-    return 'Default (dark) (terminal.sexy)' --'Builtin Solarized Dark'
-  else
-    return 'Ef-Spring'
-  end
+    if appearance:find 'Dark' then
+        return 'Default (dark) (terminal.sexy)' --'Builtin Solarized Dark'
+    else
+        return 'Ef-Spring'
+    end
 end
 
 function shellexpand(path)
     local home = os.getenv("HOME")
-    return path:gsub("^~", home)
+    fullpath, n_subs = path:gsub("^~", home)
+    return fullpath
+end
+
+local function read_paths_from_file(file_path)
+    local paths = {}
+    local file = io.open(file_path, "r")
+    if file then
+        for line in file:lines() do
+            if line ~= "" then
+                table.insert(paths, shellexpand(line))
+            end
+        end
+        file:close()
+    end
+    return paths
 end
 
 -- Function to format directory path for display
 function format_directory_path(file_path)
-  local home = os.getenv("HOME")
-  local cwd = file_path
+    local home = os.getenv("HOME")
+    local cwd = file_path
 
-  -- Check if it's a string and has a proper format
-  if type(cwd) ~= "string" then
-    return "unknown"
-  end
-
-  -- For file:// URLs (which WezTerm often uses)
-  if cwd:find("^file://") then
-    -- Remove the file:// prefix
-    cwd = cwd:gsub("^file://", "")
-  end
-
-  -- If the path is within home directory
-  if cwd:find("^" .. home) then
-    -- Replace home path with ~
-    cwd = "~" .. cwd:sub(#home + 1)
-  end
-
-  -- Get last two components
-  local components = {}
-  for component in cwd:gmatch("[^/]+") do
-    table.insert(components, component)
-  end
-
-  if #components >= 2 then
-    -- If the second-to-last component is "~", only show last component
-    if components[#components - 1] == "~" then
-      return "~/" .. components[#components]
-    else
-      -- Otherwise show last two components
-      return components[#components - 1] .. "/" .. components[#components]
+    -- Check if it's a string and has a proper format
+    if type(cwd) ~= "string" then
+        return "unknown"
     end
-  elseif #components == 1 then
-    return components[1]
-  else
-    return "/"
-  end
+
+    -- For file:// URLs (which WezTerm often uses)
+    if cwd:find("^file://") then
+        -- Remove the file:// prefix
+        cwd = cwd:gsub("^file://", "")
+    end
+
+    -- If the path is within home directory
+    if cwd:find("^" .. home) then
+        -- Replace home path with ~
+        cwd = "~" .. cwd:sub(#home + 1)
+    end
+
+    -- Get last two components
+    local components = {}
+    for component in cwd:gmatch("[^/]+") do
+        table.insert(components, component)
+    end
+
+    if #components >= 2 then
+        -- If the second-to-last component is "~", only show last component
+        if components[#components - 1] == "~" then
+            return "~/" .. components[#components]
+        else
+            -- Otherwise show last two components
+            return components[#components - 1] .. "/" .. components[#components]
+        end
+    elseif #components == 1 then
+        return components[1]
+    else
+        return "/"
+    end
 end
 
 
@@ -72,11 +87,7 @@ local config = wezterm.config_builder()
 
 local sessionizer = wezterm.plugin.require "https://github.com/mikkasendke/sessionizer.wezterm"
 sessionizer.config = {
-    paths = {
-        shellexpand("~/work/mono-1"),
-        shellexpand("~/work/mono-2"),
-        shellexpand("~/work/mono-3"),
-    },
+    paths = read_paths_from_file(shellexpand("~/.config/wezterm/session-dirs.txt")),
     command_options = {
         fd_path = '/opt/homebrew/bin/fd',
     },
@@ -100,10 +111,10 @@ local function txt_fg_fmt(color, text)
 end
 
 local function extend_table(target, source)
-  for _, v in ipairs(source) do
-    table.insert(target, v)
-  end
-  return target  -- Return the target for chaining if desired
+    for _, v in ipairs(source) do
+        table.insert(target, v)
+    end
+    return target  -- Return the target for chaining if desired
 end
 
 -- Simple string hash function (djb2 algorithm)
@@ -142,9 +153,9 @@ end
 
 -- Process color mapping (declarative approach)
 local process_colors = {
-  emacs = "orange",
-  emacsclient = "orange",
-  git = "#bb55ff" -- pretty purple
+    emacs = "orange",
+    emacsclient = "orange",
+    git = "#bb55ff" -- pretty purple
 }
 
 -- Directory prefix color mapping (declarative approach)
@@ -156,61 +167,61 @@ local dir_name_colors = {
 
 -- Format directory with colored prefixes if applicable
 local function format_colored_directory(dir_path)
-  local result = {}
-  local parts = {}
+    local result = {}
+    local parts = {}
 
-  -- Split path into components
-  for part in dir_path:gmatch("([^/]+)") do
-    table.insert(parts, part)
-  end
-
-  -- Process each part with coloring as needed
-  for i, part in ipairs(parts) do
-    if i > 1 then
-      table.insert(result, {Text = "/"})
+    -- Split path into components
+    for part in dir_path:gmatch("([^/]+)") do
+        table.insert(parts, part)
     end
 
-    if dir_name_colors[part] then
-      extend_table(result, txt_fg_fmt(dir_name_colors[part], part))
-    else
-        extend_table(result, txt_fg_fmt(get_deterministic_color(part), part))
-    end
-  end
+    -- Process each part with coloring as needed
+    for i, part in ipairs(parts) do
+        if i > 1 then
+            table.insert(result, {Text = "/"})
+        end
 
-  return result
+        if dir_name_colors[part] then
+            extend_table(result, txt_fg_fmt(dir_name_colors[part], part))
+        else
+            extend_table(result, txt_fg_fmt(get_deterministic_color(part), part))
+        end
+    end
+
+    return result
 end
 
 
 local function format_tab_title(tab, tabs, panes, config, hover, max_width)
-  local process = tab.active_pane.foreground_process_name
-  local dir = "unknown"
+    local process = tab.active_pane.foreground_process_name
+    local dir = "unknown"
 
-  -- Extract just the process name without path
-  process = process:gsub("^.*/([^/]+)$", "%1")
+    -- Extract just the process name without path
+    process = process:gsub("^.*/([^/]+)$", "%1")
 
-  if process == "mise" or process == "bash" then
-    process = "xonsh"
-  end
+    if process == "mise" or process == "bash" then
+        process = "xonsh"
+    end
 
-  if tab.active_pane and tab.active_pane.current_working_dir then
-    dir = format_directory_path(tab.active_pane.current_working_dir.path)
-  end
+    if tab.active_pane and tab.active_pane.current_working_dir then
+        dir = format_directory_path(tab.active_pane.current_working_dir.path)
+    end
 
-  local tab_format_items = { { Text = tostring(tab.tab_index + 1) .. " | "} }
+    local tab_format_items = { { Text = tostring(tab.tab_index + 1) .. " | "} }
 
-  -- Apply process coloring based on lookup table
-  if process_colors[process] then
-    extend_table(tab_format_items, txt_fg_fmt(process_colors[process], process))
-  else
-    table.insert(tab_format_items, { Text = process })
-  end
+    -- Apply process coloring based on lookup table
+    if process_colors[process] then
+        extend_table(tab_format_items, txt_fg_fmt(process_colors[process], process))
+    else
+        table.insert(tab_format_items, { Text = process })
+    end
 
-  table.insert(tab_format_items, { Text = ": " })
+    table.insert(tab_format_items, { Text = ": " })
 
-  -- Apply directory coloring
-  extend_table(tab_format_items, format_colored_directory(dir))
+    -- Apply directory coloring
+    extend_table(tab_format_items, format_colored_directory(dir))
 
-  return tab_format_items
+    return tab_format_items
 end
 
 wezterm.on('format-tab-title', format_tab_title)
@@ -294,7 +305,7 @@ config.macos_window_background_blur = 20
 config.window_decorations = "RESIZE"
 config.tab_bar_at_bottom = true
 config.window_frame = {
-  font = wezterm.font('JetBrains Mono', { size = 14 }),
+    font = wezterm.font('JetBrains Mono', { size = 14 }),
 }
 
 return config

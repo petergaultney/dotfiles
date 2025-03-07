@@ -1,0 +1,4 @@
+~/work/mono-1
+~/work/mono-2
+~/work/mono-3
+~/play/dotfiles
