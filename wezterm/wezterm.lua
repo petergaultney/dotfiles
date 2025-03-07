@@ -356,7 +356,7 @@ config.macos_window_background_blur = 20
 config.window_decorations = "RESIZE"
 config.tab_bar_at_bottom = true
 config.window_frame = {
-    font = wezterm.font('JetBrains Mono', { size = 14 }),
+    font = wezterm.font('JetBrains Mono', size = 14),
 }
 config.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
 -- no ligatures, please
@@ -380,6 +380,21 @@ config.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
 --         end
 --     end
 -- end
+
+function setup_quake_window_for_hammerspoon(config)
+    config.unix_domains = {
+        {
+            name = "quake",
+        }
+    }
+    -- This connects windows with class "wezterm-quake" to the quake domain
+    config.window_close_confirmation = "NeverPrompt"
+    config.window_class = {
+        ["wezterm-quake"] = "wezterm-quake",
+    }
+end
+
+-- setup_quake_window_for_hammerspoon(config)
 
 function print_colors()
     for i, color in ipairs(color_set) do
