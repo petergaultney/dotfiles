@@ -1,6 +1,15 @@
 local wezterm = require 'wezterm'
 local act = wezterm.action
 
+function load_config_table(module_name, default)
+  local status, config = pcall(require, module_name)
+  if status and type(config) == "table" then
+    return config
+  else
+    return default or {}
+  end
+end
+
 function hex_to_ansi(hex_color)
     -- Convert hex color #RRGGBB to RGB components
     local r, g, b = hex_color:match("#(%x%x)(%x%x)(%x%x)")
@@ -59,16 +68,24 @@ function make_set(list)  -- oof Lua is verbose sometimes
   return set
 end
 
-local function read_paths_from_file(file_path)
-    local paths = {}
+local function read_lines_from_file(file_path)
+    local lines = {}
     local file = io.open(file_path, "r")
     if file then
         for line in file:lines() do
             if line ~= "" then
-                table.insert(paths, shellexpand(line))
+                table.insert(lines, line)
             end
         end
         file:close()
+    end
+    return lines
+end
+
+local function read_paths_from_file(file_path)
+    local paths = {}
+    for i, line in ipairs(read_lines_from_file(file_path)) do
+        table.insert(paths, shellexpand(line))
     end
     return paths
 end
@@ -204,6 +221,8 @@ local process_colors = {
     git = "#bb55ff" -- pretty purple
 }
 
+local process_replacements = load_config_table('replacements', {})
+
 -- Directory prefix color mapping (declarative approach)
 local dir_name_colors = {
     ["apps"] = "cyan",
@@ -243,10 +262,28 @@ local PROCESSES_TO_NOT_PUT_ON_TAB_TITLE = make_set({ 'xonsh', 'mise', 'bash', 'z
 
 local function format_tab_title(tab, tabs, panes, config, hover, max_width)
     local process = tab.active_pane.foreground_process_name
-    local dir = "<debug?>"
 
     -- Extract just the process name without path
     process = process:gsub("^.*/([^/]+)$", "%1")
+
+    -- some processes are specially-defined by the user and we use those directly
+    -- with a known color. This is useful for things like emacs.
+    if not process_colors[process] then
+        -- but for those that aren't, we prefer the WEZTERM_PROG full command string
+        -- over the foreground_process_name.
+        if tab.active_pane.user_vars.WEZTERM_PROG then
+            process = tab.active_pane.user_vars.WEZTERM_PROG
+        end
+        for prefix, replacement in pairs(process_replacements) do
+            if process:sub(1, #prefix) == prefix then
+                process = replacement .. process:sub(#prefix + 1)
+                break
+            end
+        end
+    end
+
+    -- Trim leading spaces
+    process = process:gsub("^%s+", "")
 
     if PROCESSES_TO_NOT_PUT_ON_TAB_TITLE[process] then
         process = nil
@@ -264,10 +301,10 @@ local function format_tab_title(tab, tabs, panes, config, hover, max_width)
         table.insert(tab_format_items, { Text = ": " })
     end
 
+    local dir = "<debug?>"
     if tab.active_pane and tab.active_pane.current_working_dir then
         dir = format_directory_path(tab.active_pane.current_working_dir.path)
     end
-
 
     -- Apply directory coloring
     extend_table(tab_format_items, format_colored_directory(dir))
@@ -346,8 +383,10 @@ config.keys = {
     { key = '9', mods = 'LEADER', action = act.ActivateTab(8) },
     { key = '0', mods = 'LEADER', action = act.ActivateTab(9) },
 
-    -- Make backtick+backtick send a literal backtick
-    { key = '`', mods = 'LEADER', action = act.SendKey { key = '`' } },
+    -- Make backtick+h send a literal backtick -- i know i'm weird but i like this.
+    { key = 'h', mods = 'LEADER', action = act.SendKey { key = '`' } },
+    -- backtick+backtick to switch to last tab
+    { key = '`', mods = 'LEADER', action = act.ActivateLastTab },
 }
 
 -- Add translucency
