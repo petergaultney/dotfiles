@@ -387,7 +387,36 @@ config.keys = {
     { key = 'h', mods = 'LEADER', action = act.SendKey { key = '`' } },
     -- backtick+backtick to switch to last tab
     { key = '`', mods = 'LEADER', action = act.ActivateLastTab },
+
+    -- copy mode to be very like emacs
+    { key = ' ', mods = 'LEADER', action = act.ActivateCopyMode },
+    { key = ' ', mods = 'LEADER|CTRL', action = act.ActivateCopyMode },
 }
+
+local my_copy_mode = {
+    { key = ' ', mods = 'CTRL', action = act.CopyMode { SetSelectionMode = 'Cell' } },
+    { key = 'a', mods = 'CTRL', action = act.CopyMode 'MoveToStartOfLine' },
+    { key = 'e', mods = 'CTRL', action = act.CopyMode 'MoveToEndOfLineContent' },
+    { key = 'f', mods = 'NONE', action = act.CopyMode 'MoveForwardWord' },
+    { key = 'b', mods = 'NONE', action = act.CopyMode 'MoveBackwardWord' },
+    { key = 'w', mods = 'ALT', action = act.Multiple
+      {
+          { CopyTo = 'ClipboardAndPrimarySelection' },
+          -- { CopyMode = 'ScrollToBottom' },
+          { CopyMode = 'Close' },
+      },
+    },
+}
+local copy_mode = nil
+if wezterm.gui then
+    copy_mode = wezterm.gui.default_key_tables().copy_mode
+    for k, v in pairs(my_copy_mode) do
+        table.insert(copy_mode, v)
+    end
+    config.key_tables = {
+        copy_mode =  copy_mode
+    }
+end
 
 -- Add translucency
 config.window_background_opacity = 0.85
