@@ -1,0 +1,4 @@
+# --glob=.github/**
+# this seems to restrict rg to only a single directory - not what we want.
+
+--hidden

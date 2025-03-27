@@ -463,9 +463,15 @@ end
 
 wezterm.on('window-config-reloaded', switch_themes)
 wezterm.print_colors = print_colors
+config.send_composed_key_when_right_alt_is_pressed = true
+config.term = 'xterm-256color'
+config.scrollback_lines = 1000000
 
 require("wuake").setup {  -- this does not quite work
-  config = config,
+    config = config,
+    config_overrides = {
+        hide_tab_bar_if_only_one_tab = true,
+    }
 }
 
 return config

@@ -3,6 +3,8 @@
 from pathlib import Path
 import os
 
+$RIPGREP_CONFIG_PATH = os.path.expanduser('~/.config/.ripgreprc')
+
 # $PYENV_ROOT = "$HOME/.pyenv"
 # $PATH.insert(0, $PYENV_ROOT + '/bin')
 # xontrib load pyenv
@@ -15,8 +17,6 @@ if '/opt/homebrew/bin' not in $PATH and os.path.exists('/opt/homebrew/bin'):
     $PATH.insert(0, '/opt/homebrew/bin')
 
 # $PATH = [pth for pth in $PATH if 'pyenv/versions' not in str(pth)]
-
-
 
 _path_dirs = [
     '~/sw/bin',
@@ -31,9 +31,6 @@ _resolved = [os.path.expanduser(pth) for pth in _path_dirs]
 $PATH = [pth for pth in $PATH if pth not in _resolved]
 for pth in reversed(_resolved):
     $PATH.insert(0, pth)
-
-# source-bash "/Users/peter.gaultney/.sdkman/bin/sdkman-init.sh"
-
 
 # ls
 
@@ -111,13 +108,10 @@ def ulimit_n(n):
 
 
 # work stuff
-$JAVA_TOOL_OPTIONS = '-Djavax.net.ssl.trustStore=/etc/java_ca_certs'
 $THDS_CORE_LOG_LEVELS_FILE = os.path.expanduser('~/work/.thds_log_levels.txt')
 
-aliases['adu'] = 'poetry run adls-download-uri '
-aliases['adu-clip'] = 'poetry run adls-download-uri $(pbpaste)'
-
-# source-bash "$HOME/.sdkman/bin/sdkman-init.sh"
+aliases['adu'] = 'uv run adls-download-uri '
+aliases['adu-clip'] = 'uv run adls-download-uri $(pbpaste)'
 
 
 def cd_repo_root():
@@ -148,6 +142,7 @@ aliases['mon'] = mono
 xontrib load fish_completer
 # xontrib load direnv
 xontrib load abbrevs
+xontrib load term_integration
 
 execx($(~/.local/bin/mise activate xonsh))
 # source ~/.config/xonsh/*.xsh
