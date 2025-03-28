@@ -1,7 +1,7 @@
 # source ~/work/obsidian-work/work/xonshrc.md
 #
-from pathlib import Path
 import os
+from pathlib import Path
 
 $RIPGREP_CONFIG_PATH = os.path.expanduser('~/.config/.ripgreprc')
 
@@ -84,8 +84,8 @@ $PIPENV_VENV_IN_PROJECT = '1'
 
 aliases['rr'] = 'poetry run'
 aliases['pr'] = 'pipenv run'
-aliases['pis'] = 'poetry install --sync --all-extras'
-aliases['pylsp-install'] = 'pipenv run pip install python-lsp-server pylsp-mypy pyls-isort python-lsp-black'
+# aliases['pis'] = 'poetry install --sync --all-extras'
+aliases['pylsp-install'] = 'uv run pip install python-lsp-server pylsp-mypy pyls-isort python-lsp-black'
 
 aliases['ptx'] = 'uv run pytest -n auto --cov --cov-report=html'
 aliases['vv'] = 'uv run'
@@ -128,21 +128,24 @@ def mono(args):
     orig_dir = os.getcwd()
     cd_repo_root()
     try:
-        @(['poetry', 'run', 'mono', *args])
+        @(['uv', 'run', 'mono', *args])
     finally:
         os.chdir(orig_dir)
 
 
 aliases['mon'] = mono
+
 # fancy xontribs
-
-
 # xontrib load z
-
 xontrib load fish_completer
 # xontrib load direnv
 xontrib load abbrevs
 xontrib load term_integration
+
+if platform.uname().node.startswith('mercy-m1'):
+    # Starship Prompt (must be at the end of the rc)
+    execx($(starship init xonsh))
+    execx($(zoxide init xonsh), 'exec', __xonsh__.ctx, filename='zoxide')  # needs to be after starship https://github.com/ajeetdsouza/zoxide/issues/570
 
 execx($(~/.local/bin/mise activate xonsh))
 # source ~/.config/xonsh/*.xsh
