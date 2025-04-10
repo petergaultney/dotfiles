@@ -369,8 +369,8 @@ config.keys = {
     -- Tabs
     { key = 'c', mods = 'LEADER', action = act.SpawnTab 'DefaultDomain' },
     { key = 'k', mods = 'LEADER', action = act.CloseCurrentTab { confirm = false } },
-    { key = '[', mods = 'LEADER', action = act.ActivateTabRelative(-1) },
-    { key = ']', mods = 'LEADER', action = act.ActivateTabRelative(1) },
+    { key = 'n', mods = 'LEADER', action = act.ActivateTabRelative(-1) },  -- 'arrow left'
+    { key = 'o', mods = 'LEADER', action = act.ActivateTabRelative(1) },  -- 'arrow right'
     { key = '1', mods = 'LEADER', action = act.ActivateTab(0) },
     { key = '2', mods = 'LEADER', action = act.ActivateTab(1) },
     { key = '3', mods = 'LEADER', action = act.ActivateTab(2) },
@@ -382,6 +382,8 @@ config.keys = {
     { key = '8', mods = 'LEADER', action = act.ActivateTab(7) },
     { key = '9', mods = 'LEADER', action = act.ActivateTab(8) },
     { key = '0', mods = 'LEADER', action = act.ActivateTab(9) },
+    { key = 'LeftArrow', mods = 'LEADER', action = act.MoveTabRelative(-1) },
+    { key = 'RightArrow', mods = 'LEADER', action = act.MoveTabRelative(1) },
 
     -- Make backtick+h send a literal backtick -- i know i'm weird but i like this.
     { key = 'h', mods = 'LEADER', action = act.SendKey { key = '`' } },

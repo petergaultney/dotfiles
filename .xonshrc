@@ -90,6 +90,7 @@ aliases['pylsp-install'] = 'uv run pip install python-lsp-server pylsp-mypy pyls
 aliases['ptx'] = 'uv run pytest -n auto --cov --cov-report=html'
 aliases['vv'] = 'uv run'
 aliases['us'] = 'uv sync'
+aliases['vip'] = 'uv run --with ipython ipython'
 
 def run_dmypy():
     uv run dmypy run -- . --config-file pyproject.toml
