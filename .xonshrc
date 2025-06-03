@@ -16,6 +16,8 @@ if '/opt/homebrew/bin' not in $PATH and os.path.exists('/opt/homebrew/bin'):
     # arm64 homebrew
     $PATH.insert(0, '/opt/homebrew/bin')
 
+$HOMEBREW_NO_AUTO_UPDATE = '1'
+
 # $PATH = [pth for pth in $PATH if 'pyenv/versions' not in str(pth)]
 
 _path_dirs = [
@@ -89,8 +91,9 @@ aliases['pylsp-install'] = 'uv run pip install python-lsp-server pylsp-mypy pyls
 
 aliases['ptx'] = 'uv run pytest -n auto --cov --cov-report=html'
 aliases['vv'] = 'uv run'
-aliases['us'] = 'uv sync'
+aliases['us'] = 'uv sync'y
 aliases['vip'] = 'uv run --with ipython ipython'
+aliases['mi'] = 'uv run mops-inspect'
 
 def run_dmypy():
     uv run dmypy run -- . --config-file pyproject.toml
@@ -142,6 +145,8 @@ xontrib load fish_completer
 # xontrib load direnv
 xontrib load abbrevs
 xontrib load term_integration
+
+import platform
 
 if platform.uname().node.startswith('mercy-m1'):
     # Starship Prompt (must be at the end of the rc)

@@ -1,0 +1,23 @@
+k9s:
+  ui:
+    enableMouse: true
+ # Logs configuration
+  logger:
+    # Defines the number of lines to return. Default 100
+    tail: 1000
+    # Defines the total number of log lines to allow in the view. Default 1000
+    buffer: 10000
+  clusters:
+    datascience:
+      namespace:
+        lockFavorites: true
+        favorites:
+          - peter-gaultney
+          - unified-directory
+          - person-api
+          - tim-blass
+          - grant-andersen
+          - caleb-gregory
+          - ben-cornelis
+          - matt-eby
+          - matt-hawthorn

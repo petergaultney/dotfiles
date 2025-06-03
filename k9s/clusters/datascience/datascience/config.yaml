@@ -1,0 +1,20 @@
+k9s:
+  cluster: datascience
+  namespace:
+    active: peter-gaultney
+    lockFavorites: true
+    favorites:
+    - peter-gaultney
+    - unified-directory
+    - person-api
+    - tim-blass
+    - grant-andersen
+    - caleb-gregory
+    - ben-cornelis
+    - matt-eby
+    - unified-asset
+  view:
+    active: pod
+  featureGates:
+    nodeShell: false
+  portForwardAddress: localhost

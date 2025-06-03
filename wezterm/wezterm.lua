@@ -421,7 +421,7 @@ if wezterm.gui then
 end
 
 -- Add translucency
-config.window_background_opacity = 0.85
+config.window_background_opacity = 0.8
 config.macos_window_background_blur = 20
 config.window_decorations = "RESIZE"
 config.tab_bar_at_bottom = true
@@ -467,13 +467,13 @@ wezterm.on('window-config-reloaded', switch_themes)
 wezterm.print_colors = print_colors
 config.send_composed_key_when_right_alt_is_pressed = true
 config.term = 'xterm-256color'
-config.scrollback_lines = 1000000
+config.scrollback_lines = 10000
 
-require("wuake").setup {  -- this does not quite work
-    config = config,
-    config_overrides = {
-        hide_tab_bar_if_only_one_tab = true,
-    }
-}
+-- require("wuake").setup {  -- this does not quite work
+--     config = config,
+--     config_overrides = {
+--         hide_tab_bar_if_only_one_tab = true,
+--     }
+-- }
 
 return config
