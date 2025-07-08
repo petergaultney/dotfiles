@@ -476,4 +476,31 @@ config.scrollback_lines = 10000
 --     }
 -- }
 
+
+local scratch = "_scratch" -- Keep this consistent with Hammerspoon
+wezterm.on("gui-attached", function(domain)
+  local mux = wezterm.mux
+  local workspace = mux.get_active_workspace()
+  wezterm.log_info("gui-attached: active workspace is ")
+  if workspace ~= scratch then return end
+
+  -- Compute width: 66% of screen width, up to 1000 px
+  local width_ratio = 1.0
+  local width_max = 2000
+  local aspect_ratio = 16 / 9
+  local screen = wezterm.gui.screens().active
+  local width = math.min(screen.width * width_ratio, width_max)
+  local height = width / aspect_ratio
+
+  wezterm.log_info("gui-attached: looking for matching windows")
+  for _, window in ipairs(mux.all_windows()) do
+    local gwin = window:gui_window()
+    if gwin ~= nil then
+      wezterm.log_info("gui-attached: found matching window " .. gwin:window_id() .. " for workspace " .. workspace)
+      gwin:perform_action(act.SetWindowLevel "AlwaysOnTop", gwin:active_pane())
+      gwin:set_inner_size(width, height)
+    end
+  end
+end)
+
 return config

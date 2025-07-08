@@ -3,6 +3,31 @@
 import os
 from pathlib import Path
 
+# from xonsh.built_ins import XSH
+# # git utilities
+
+# # This can be outside the event handler for cleanliness
+# def _expand_git_root(arg):
+#     if isinstance(arg, str) and arg.startswith('.../'):
+#         try:
+#             root = XSH.subproc_captured_stdout(['git', 'rev-parse', '--show-toplevel']).strip()
+#             print(arg, type(arg), root)
+#             return arg.replace('.../', root + '/', 1)
+#         except subprocess.CalledProcessError:
+#             print(f"Failed to expand git root for argument: {arg}")
+#             return arg # git command failed, return original arg
+#     return arg
+
+# @XSH.builtins.events.on_transform_command
+# def git_root_transformer(cmd, **_):
+#     """Scan command arguments and replace '.../' with the git root."""
+#     outcmd = ' '.join((_expand_git_root(arg) for arg in cmd.split()))
+#     print(outcmd)
+#     return outcmd
+
+# # end git utilities
+# none of the above seems to work at all.
+
 $RIPGREP_CONFIG_PATH = os.path.expanduser('~/.config/.ripgreprc')
 
 # $PYENV_ROOT = "$HOME/.pyenv"
@@ -64,6 +89,8 @@ aliases['e'] = 'emacsclient -t '
 aliases['ea'] = "emacsclient --eval '(abort-recursive-edit)'"
 aliases['fix-emacs'] = "emacsclient --eval '(abort-recursive-edit)'"
 $EDITOR = 'emacsclient -t'
+aliases['esh'] = 'emacsclient -t -e "(eshell t)"'
+aliases['edir'] = 'emacsclient -t -e "(dired default-directory)"'
 
 def edaemon_pid() -> int:
     # find emacs, but not ripgrep searching for emacs.
@@ -91,12 +118,12 @@ aliases['pylsp-install'] = 'uv run pip install python-lsp-server pylsp-mypy pyls
 
 aliases['ptx'] = 'uv run pytest -n auto --cov --cov-report=html'
 aliases['vv'] = 'uv run'
-aliases['us'] = 'uv sync'y
+aliases['us'] = 'uv sync'
 aliases['vip'] = 'uv run --with ipython ipython'
 aliases['mi'] = 'uv run mops-inspect'
 
 def run_dmypy():
-    uv run dmypy run -- . --config-file pyproject.toml
+    uv run dmypy run --timeout 3600 -- . --config-file pyproject.toml
 
 aliases['mst'] = run_dmypy
 aliases['pst'] = 'uv run pytest tests'
