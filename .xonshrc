@@ -1,6 +1,7 @@
 # source ~/work/obsidian-work/work/xonshrc.md
 #
 import os
+import platform
 from pathlib import Path
 
 # from xonsh.built_ins import XSH
@@ -107,6 +108,46 @@ def kill_edaemon():
 
 aliases['ked'] = kill_edaemon
 
+# vterm integration for xonsh
+# Only run this code if we are inside vterm
+if "EMACS_VTERM_PATH" in ${...}:
+    import os
+    import platform
+
+    # Helper to print raw vterm escape sequences. Not an alias.
+    def _vterm_printf(payload: str):
+        term = ${"TERM"}
+        if "TMUX" in ${...} and term.startswith(("tmux", "screen")):
+            print(f"\x1bPtmux;\x1b\x1b]{payload}\x07\x1b\\", end="", flush=True)
+        elif term.startswith("screen"):
+            print(f"\x1bP\x1b]{payload}\x07\x1b\\", end="", flush=True)
+        else:
+            print(f"\x1b]{payload}\x1b\\", end="", flush=True)
+
+    # Helper to format and send an Elisp command. Not an alias.
+    def _vterm_cmd(*args):
+        def escape(s):
+            return s.replace('\\', '\\\\').replace('"', '\\"')
+        elisp_str = " ".join([f'"{escape(arg)}"' for arg in args])
+        _vterm_printf(f"51;E{elisp_str}")
+
+    # Use the decorator for the pre-prompt event hook
+    @events.on_pre_prompt
+    def _vterm_pre_prompt_hook():
+        pwd = os.getcwd()
+
+        # 1. Directory Tracking
+        _vterm_cmd("update-pwd", f"{pwd}/")
+
+        # 2. Prompt Tracking
+        user = ${"USER"}
+        host = platform.node()
+        prompt_info = f"51;A{user}@{host}:{pwd}"
+        _vterm_printf(prompt_info)
+
+
+## END Emacs
+
 # Python/venvs
 
 $PIPENV_VENV_IN_PROJECT = '1'
@@ -130,6 +171,7 @@ aliases['pst'] = 'uv run pytest tests'
 aliases['slack'] = 'open -a Slack'
 aliases['ohslack'] = 'killall Slack; open -a Slack'
 
+aliases['tailscale'] = "/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 
 # resources
 
