@@ -146,6 +146,17 @@ if "EMACS_VTERM_PATH" in ${...}:
         _vterm_printf(prompt_info)
 
 
+    def _e(args):
+        if args:
+            print(f"\033]51;Ee {' '.join(args)}\033\\", end='')
+        else:
+            print("Usage: e <filename>")
+
+    aliases['e'] = _e
+    # override the e alias that works in a 'normal' terminal to open emacsclient
+
+
+
 ## END Emacs
 
 # Python/venvs
@@ -162,6 +173,11 @@ aliases['vv'] = 'uv run'
 aliases['us'] = 'uv sync'
 aliases['vip'] = 'uv run --with ipython ipython'
 aliases['mi'] = 'uv run mops-inspect'
+
+
+def pcr():
+    $SKIP='mono-docker-lock'
+    pre-commit run
 
 def run_dmypy():
     uv run dmypy run --timeout 3600 -- . --config-file pyproject.toml
