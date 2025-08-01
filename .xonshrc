@@ -84,14 +84,7 @@ aliases['gd'] = _gd
 
 # Emacs
 
-# emacs
-aliases['edaemon'] = 'emacs --daemon'
-aliases['e'] = 'emacsclient -t '
-aliases['ea'] = "emacsclient --eval '(abort-recursive-edit)'"
-aliases['fix-emacs'] = "emacsclient --eval '(abort-recursive-edit)'"
 $EDITOR = 'emacsclient -t'
-aliases['esh'] = 'emacsclient -t -e "(eshell t)"'
-aliases['edir'] = 'emacsclient -t -e "(dired default-directory)"'
 
 def edaemon_pid() -> int:
     # find emacs, but not ripgrep searching for emacs.
@@ -106,6 +99,16 @@ def edaemon_interrupt():
 def kill_edaemon():
     kill -9 @(edaemon_pid())
 
+def _fix_emacs():
+    kill -USR2 @(edaemon_pid())
+    emacsclient --eval '(abort-recursive-edit)'
+
+aliases['edaemon'] = 'emacs --daemon'
+aliases['e'] = 'emacsclient -t '
+aliases['ea'] = "emacsclient --eval '(abort-recursive-edit)'"
+aliases['fix-emacs'] = _fix_emacs
+aliases['esh'] = 'emacsclient -t -e "(eshell t)"'
+aliases['edir'] = 'emacsclient -t -e "(dired default-directory)"'
 aliases['ked'] = kill_edaemon
 
 # vterm integration for xonsh
