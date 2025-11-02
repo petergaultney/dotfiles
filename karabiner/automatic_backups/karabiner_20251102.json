@@ -5,25 +5,6 @@
                 "parameters": { "basic.to_if_alone_timeout_milliseconds": 400 },
                 "rules": [
                     {
-                        "description": "Tap Caps Lock for ESC or Hold for Command",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "caps_lock",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_command",
-                                        "lazy": true
-                                    }
-                                ],
-                                "to_if_alone": [{ "key_code": "escape" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": "PrintScreen -> Shift+Tab",
                         "manipulators": [
                             {
@@ -518,6 +499,10 @@
                         "vendor_id": 1452
                     },
                     "simple_modifications": [
+                        {
+                            "from": { "key_code": "caps_lock" },
+                            "to": [{ "key_code": "right_command" }]
+                        },
                         {
                             "from": { "key_code": "left_command" },
                             "to": [{ "key_code": "right_control" }]
