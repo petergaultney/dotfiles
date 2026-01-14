@@ -1,5 +1,7 @@
 # source ~/work/obsidian-work/work/xonshrc.md
 #
+$XONSH_COLOR_STYLE = 'native'  # better constrast within wezterm at least
+
 import os
 import platform
 from pathlib import Path
@@ -48,6 +50,7 @@ $HOMEBREW_NO_AUTO_UPDATE = '1'
 
 _path_dirs = [
     '~/sw/bin',
+    "~/.atuin/bin",
     '~/.local/share/mise/shims',
     '~/.local/bin',
     '~/.cargo/bin',
@@ -201,6 +204,7 @@ def ulimit_n(n):
 
 # work stuff
 $THDS_CORE_LOG_LEVELS_FILE = os.path.expanduser('~/work/.thds_log_levels.txt')
+$SKIP='mono-docker-lock'
 
 aliases['adu'] = 'uv run adls-download-uri '
 aliases['adu-clip'] = 'uv run adls-download-uri $(pbpaste)'
@@ -224,8 +228,37 @@ def mono(args):
     finally:
         os.chdir(orig_dir)
 
-
 aliases['mon'] = mono
+
+#if Path('~/.gent/init.sh').resolve().exists():
+source-bash ~/.gent/init.sh
+source-bash ~/.gent/wt-completion.bash
+
+
+def _notify_done(args, stdin=None):
+    import os
+    from pathlib import Path
+
+    current_dir = Path.cwd().name
+
+    $[@(args)]
+
+    rc = __xonsh__.last.rtn
+
+    # Customize message based on success/failure
+    if rc == 0:
+        message = f"done in {current_dir}"
+    else:
+        message = f"failed in {current_dir}"
+
+    say @(message)
+
+    return rc
+
+aliases['sd'] = _notify_done
+
+
+$BASH_COMPLETIONS.insert(0, '/opt/homebrew/etc/profile.d/bash_completion.sh')
 
 # fancy xontribs
 # xontrib load z
@@ -233,6 +266,9 @@ xontrib load fish_completer
 # xontrib load direnv
 xontrib load abbrevs
 xontrib load term_integration
+# xontrib load bash_completions
+
+execx($(@(f"{os.path.expanduser('~/.atuin')}/bin/atuin", "init", "xonsh", "--disable-up-arrow")))
 
 import platform
 

@@ -48,7 +48,14 @@ end
 
 function scheme_for_appearance(appearance)
     if appearance:find 'Dark' then
-        return 'Default (dark) (terminal.sexy)' --'Builtin Solarized Dark'
+        -- return 'Default Dark (base16)'
+        -- return 'Default (dark) (terminal.sexy)'
+        -- return 'Builtin Solarized Dark'
+        return 'Dracula' -- mostly very good except pre-commit PASSED
+        -- return 'Catppuccin Mocha'  # PASSED completely unreadable
+        -- return 'Gruvbox Dark'
+        -- return 'One Dark (base16)'
+        -- return 'monokai'
     else
         return 'Ef-Spring'
     end
@@ -148,6 +155,9 @@ sessionizer.apply_to_config(config, true)
 
 -- Set color scheme based on system appearance
 config.color_scheme = scheme_for_appearance(get_appearance())
+config.colors = {
+    background = '#000000',
+}
 
 -- config.term = "wezterm"
 config.enable_kitty_graphics = false
@@ -319,6 +329,9 @@ config.leader = { key = '`', mods = '', timeout_milliseconds = 1000 }
 
 -- Define keyboard shortcuts that use the leader
 config.keys = {
+    -- Shift+Enter sends CSI u sequence for Claude Code multi-line input
+    { key = 'Enter', mods = 'SHIFT', action = act.SendString '\x1b[13;2u' },
+
     -- Add iTerm-like fullscreen toggle
     { key = '0', mods = 'CMD|SHIFT', action = act.ToggleFullScreen },
 
