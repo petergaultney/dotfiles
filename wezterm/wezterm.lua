@@ -491,6 +491,19 @@ config.scrollback_lines = 10000
 
 
 local scratch = "_scratch" -- Keep this consistent with Hammerspoon
+-- Handler for programmatic workspace switching via escape sequences
+-- Usage from shell: printf "\033]1337;SetUserVar=switch_workspace=%s\007" "$(echo -n 'workspace-name' | base64)"
+-- WezTerm auto-decodes the base64 value, so we use it directly
+wezterm.on('user-var-changed', function(window, pane, name, value)
+  if name == "switch_workspace" then
+    wezterm.log_info("switch_workspace: received value '" .. value .. "'")
+    window:perform_action(
+      act.SwitchToWorkspace { name = value },
+      pane
+    )
+  end
+end)
+
 wezterm.on("gui-attached", function(domain)
   local mux = wezterm.mux
   local workspace = mux.get_active_workspace()
