@@ -501,6 +501,39 @@ wezterm.on('user-var-changed', function(window, pane, name, value)
       act.SwitchToWorkspace { name = value },
       pane
     )
+  elseif name == "switch_workspace_and_pane" then
+    -- Format: "workspace|pane_id"
+    local sep = value:find("|")
+    if sep then
+      local workspace = value:sub(1, sep - 1)
+      local target_pane_id = tonumber(value:sub(sep + 1))
+      wezterm.log_info("switch_workspace_and_pane: workspace='" .. workspace .. "' pane_id=" .. tostring(target_pane_id))
+
+      -- Use action_callback to switch workspace then find and activate the pane
+      window:perform_action(
+        wezterm.action_callback(function(win, p)
+          -- First switch to the workspace
+          win:perform_action(act.SwitchToWorkspace { name = workspace }, p)
+
+          -- Now find and activate the target pane
+          local mux = wezterm.mux
+          for _, mux_win in ipairs(mux.all_windows()) do
+            for _, tab in ipairs(mux_win:tabs()) do
+              for _, tab_pane in ipairs(tab:panes()) do
+                if tab_pane:pane_id() == target_pane_id then
+                  tab:activate()
+                  tab_pane:activate()
+                  wezterm.log_info("Activated pane " .. target_pane_id)
+                  return
+                end
+              end
+            end
+          end
+          wezterm.log_error("Could not find pane " .. tostring(target_pane_id))
+        end),
+        pane
+      )
+    end
   end
 end)
 
