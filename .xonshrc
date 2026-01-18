@@ -63,6 +63,10 @@ $PATH = [pth for pth in $PATH if pth not in _resolved]
 for pth in reversed(_resolved):
     $PATH.insert(0, pth)
 
+# wezterm
+
+aliases['rename'] = 'wezterm cli rename-workspace '
+
 # ls
 
 aliases['la'] = 'ls -la'
@@ -259,6 +263,17 @@ aliases['sd'] = _notify_done
 
 
 $BASH_COMPLETIONS.insert(0, '/opt/homebrew/etc/profile.d/bash_completion.sh')
+
+# tmux directory tracking (for window-status colors)
+if "TMUX" in ${...}:
+    @events.on_chdir
+    def _report_cwd_to_tmux(olddir, newdir, **kw):
+        # OSC 7 tells tmux the current directory
+        # Wrap in DCS passthrough for tmux
+        print(f"\x1bPtmux;\x1b\x1b]7;file://{platform.node()}{newdir}\x1b\x1b\\\x1b\\", end="", flush=True)
+
+    # Also send on shell startup
+    _report_cwd_to_tmux(None, os.getcwd())
 
 # fancy xontribs
 # xontrib load z
