@@ -262,25 +262,16 @@ def _notify_done(args, stdin=None):
 aliases['sd'] = _notify_done
 
 
-$BASH_COMPLETIONS.insert(0, '/opt/homebrew/etc/profile.d/bash_completion.sh')
+# $BASH_COMPLETIONS.insert(0, '/opt/homebrew/etc/profile.d/bash_completion.sh')
 
-# tmux directory tracking (for window-status colors)
-if "TMUX" in ${...}:
-    @events.on_chdir
-    def _report_cwd_to_tmux(olddir, newdir, **kw):
-        # OSC 7 tells tmux the current directory
-        # Wrap in DCS passthrough for tmux
-        print(f"\x1bPtmux;\x1b\x1b]7;file://{platform.node()}{newdir}\x1b\x1b\\\x1b\\", end="", flush=True)
-
-    # Also send on shell startup
-    _report_cwd_to_tmux(None, os.getcwd())
+# tmux directory tracking now handled via prompt field in prompt.py
 
 # fancy xontribs
 # xontrib load z
 xontrib load fish_completer
 # xontrib load direnv
 xontrib load abbrevs
-xontrib load term_integration
+# xontrib load term_integration  # disabled - using custom tmux OSC 7 hook instead
 # xontrib load bash_completions
 
 execx($(@(f"{os.path.expanduser('~/.atuin')}/bin/atuin", "init", "xonsh", "--disable-up-arrow")))
@@ -292,5 +283,5 @@ if platform.uname().node.startswith('mercy-m1'):
     execx($(starship init xonsh))
     execx($(zoxide init xonsh), 'exec', __xonsh__.ctx, filename='zoxide')  # needs to be after starship https://github.com/ajeetdsouza/zoxide/issues/570
 
-execx($(~/.local/bin/mise activate xonsh))
+# execx($(~/.local/bin/mise activate xonsh))  # temporarily disabled for debugging
 # source ~/.config/xonsh/*.xsh
