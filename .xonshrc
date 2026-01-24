@@ -266,11 +266,26 @@ aliases['sd'] = _notify_done
 # $BASH_COMPLETIONS.insert(0, '/opt/homebrew/etc/profile.d/bash_completion.sh')
 
 # tmux directory tracking via OSC 7 (for lemonaid window colors)
+#
+# WHY: tmux's pane_current_path is unreliable for xonsh - it shows the original
+# directory, not where you've cd'd to. OSC 7 tells tmux the actual current dir.
+#
+# HOW: Send OSC 7 escape sequence directly to tmux on every directory change.
+# tmux stores this in #{pane_path}, which lemonaid-tmux-window-status uses.
+#
+# IMPORTANT: Must use DIRECT format, not passthrough format!
+#   - Direct:      \x1b]7;file://host/path\x07       -> tmux receives & stores in pane_path
+#   - Passthrough: \x1bPtmux;\x1b\x1b]7;...\x1b\\    -> bypasses tmux, goes to outer terminal
+#
+# ALSO: tmux.conf needs: set -as terminal-features 'xterm*:osc7'
+#
+# Full docs: ~/obsidian-personal/14.../14.27.../tmux-xonsh-directory-tracking.md
+#
 if "TMUX" in ${...}:
     @events.on_chdir
     def _tmux_osc7(olddir, newdir, **kw):
-        print(f"\x1bPtmux;\x1b\x1b]7;file://{platform.node()}{newdir}\x1b\x1b\\\x1b\\", end="", flush=True)
-    _tmux_osc7(None, os.getcwd())  # run on startup
+        print(f"\x1b]7;file://{platform.node()}{newdir}\x07", end="", flush=True)
+    _tmux_osc7(None, os.getcwd())  # send on shell startup too
 
 # fancy xontribs
 # xontrib load z
