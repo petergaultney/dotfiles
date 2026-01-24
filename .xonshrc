@@ -234,9 +234,10 @@ def mono(args):
 
 aliases['mon'] = mono
 
-#if Path('~/.gent/init.sh').resolve().exists():
-source-bash ~/.gent/init.sh
-source-bash ~/.gent/wt-completion.bash
+# work machine only
+if Path('~/.gent/init.sh').expanduser().exists():
+    source-bash ~/.gent/init.sh
+    source-bash ~/.gent/wt-completion.bash
 
 
 def _notify_done(args, stdin=None):
@@ -264,7 +265,12 @@ aliases['sd'] = _notify_done
 
 # $BASH_COMPLETIONS.insert(0, '/opt/homebrew/etc/profile.d/bash_completion.sh')
 
-# tmux directory tracking now handled via prompt field in prompt.py
+# tmux directory tracking via OSC 7 (for lemonaid window colors)
+if "TMUX" in ${...}:
+    @events.on_chdir
+    def _tmux_osc7(olddir, newdir, **kw):
+        print(f"\x1bPtmux;\x1b\x1b]7;file://{platform.node()}{newdir}\x1b\x1b\\\x1b\\", end="", flush=True)
+    _tmux_osc7(None, os.getcwd())  # run on startup
 
 # fancy xontribs
 # xontrib load z
@@ -274,7 +280,10 @@ xontrib load abbrevs
 # xontrib load term_integration  # disabled - using custom tmux OSC 7 hook instead
 # xontrib load bash_completions
 
-execx($(@(f"{os.path.expanduser('~/.atuin')}/bin/atuin", "init", "xonsh", "--disable-up-arrow")))
+# atuin shell history (work machine only)
+_atuin_bin = Path('~/.atuin/bin/atuin').expanduser()
+if _atuin_bin.exists():
+    execx($(@(str(_atuin_bin), "init", "xonsh", "--disable-up-arrow")))
 
 import platform
 
