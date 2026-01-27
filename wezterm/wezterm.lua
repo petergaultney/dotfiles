@@ -228,7 +228,8 @@ local process_colors = {
     emacs = "orange",
     emacsclient = "orange",
     Emacs = 'orange',
-    git = "#bb55ff" -- pretty purple
+    git = "#bb55ff", -- pretty purple
+    claude = "#50FA7B", -- bright green (matches lemonaid)
 }
 
 local process_replacements = load_config_table('replacements', {})
@@ -267,18 +268,106 @@ local function format_colored_directory(dir_path)
 end
 
 
-local PROCESSES_TO_NOT_PUT_ON_TAB_TITLE = make_set({ 'xonsh', 'mise', 'bash', 'zsh', 'fish', 'starship' })
+local PROCESSES_TO_NOT_PUT_ON_TAB_TITLE = make_set({ 'xonsh', 'mise', 'bash', 'zsh', 'fish', 'starship', 'atuin' })
+
+-- Standalone apps: show ONLY the process name, no directory
+-- These are apps where the launch directory isn't meaningful
+local STANDALONE_PROCESSES = make_set({
+    'claude',
+    'emacs',
+    'emacsclient',
+    'Emacs',
+    'vim',
+    'nvim',
+    'htop',
+    'top',
+    'lma',
+})
+
+-- Detect version strings like "2.1.11" which indicate Claude Code
+local function is_version_string(s)
+    return s:match("^%d+%.%d+%.%d+$") ~= nil
+end
+
+-- Check if process is an interpreter where we prefer pane_title over the interpreter name
+local function is_interpreter(process)
+    -- Match python, python3, python3.12, etc.
+    if process:match("^python%d*%.?%d*$") then
+        return true
+    end
+    -- Other interpreters
+    local other_interpreters = make_set({ 'node', 'ruby', 'perl' })
+    return other_interpreters[process]
+end
+
+-- Extract app name from pane title (e.g., "lma" from "lma - some description")
+local function extract_app_from_title(title, dir)
+    if not title or title == "" then
+        return nil
+    end
+
+    -- Get first word from title
+    local first_word = title:match("^(%S+)")
+    if not first_word then
+        return nil
+    end
+
+    -- Skip if it looks like a path
+    if first_word:match("^[/~]") then
+        return nil
+    end
+
+    -- Skip if it looks like user@host
+    if first_word:match("@") then
+        return nil
+    end
+
+    -- Skip common shell defaults
+    local shell_defaults = make_set({ 'bash', 'zsh', 'fish', 'xonsh', '-bash', '-zsh', 'sh' })
+    if shell_defaults[first_word] then
+        return nil
+    end
+
+    -- Skip if it matches the directory name (common default title)
+    if dir then
+        local dir_name = dir:match("([^/]+)$")
+        if dir_name and first_word == dir_name then
+            return nil
+        end
+    end
+
+    return first_word
+end
 
 
 local function format_tab_title(tab, tabs, panes, config, hover, max_width)
     local process = tab.active_pane.foreground_process_name
+    local title = tab.active_pane.title
+    local dir = tab.active_pane.current_working_dir and tab.active_pane.current_working_dir.path or ""
 
     -- Extract just the process name without path
     process = process:gsub("^.*/([^/]+)$", "%1")
 
+    -- Version strings like "2.1.11" are Claude Code
+    if is_version_string(process) then
+        process = "claude"
+    end
+
+    -- For interpreters (python, node, etc.), try to extract app name from title
+    if is_interpreter(process) then
+        local app_name = extract_app_from_title(title, dir)
+        if app_name then
+            process = app_name
+            -- Check if the extracted app is standalone
+            if STANDALONE_PROCESSES[process] then
+                -- will be handled below
+            end
+        end
+    end
+
     -- some processes are specially-defined by the user and we use those directly
     -- with a known color. This is useful for things like emacs.
-    if not process_colors[process] then
+    if not process_colors[process] and not STANDALONE_PROCESSES[process] and not is_interpreter(process) then
         -- but for those that aren't, we prefer the WEZTERM_PROG full command string
         -- over the foreground_process_name.
         if tab.active_pane.user_vars.WEZTERM_PROG then
@@ -300,6 +389,13 @@ local function format_tab_title(tab, tabs, panes, config, hover, max_width)
     end
 
     local tab_format_items = { { Text = tostring(tab.tab_index + 1) .. " | "} }
+
+    -- Standalone processes: show ONLY the process name, no directory
+    if process and STANDALONE_PROCESSES[process] then
+        local color = process_colors[process] or get_deterministic_color(process)
+        extend_table(tab_format_items, txt_fg_fmt(color, process))
+        return tab_format_items
+    end
 
     if process then
         -- Apply process coloring based on lookup table

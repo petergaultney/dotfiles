@@ -4,16 +4,22 @@ import platform
 from xonsh.built_ins import XSH
 
 
-def _tmux_osc7():
-    """Emit OSC 7 for tmux directory tracking (invisible in prompt)."""
+def _osc7():
+    """Emit OSC 7 for directory tracking (tmux and WezTerm)."""
+    cwd = os.getcwd()
+
     if os.environ.get("TMUX"):
-        cwd = os.getcwd()
+        # tmux needs to write directly to tty
         try:
             with open("/dev/tty", "w") as tty:
                 tty.write(f"\033]7;file://{platform.node()}{cwd}\033\\")
                 tty.flush()
         except OSError:
             pass
+    elif os.environ.get("WEZTERM_PANE"):
+        # WezTerm natively understands OSC 7
+        print(f"\033]7;file://{platform.node()}{cwd}\033\\", end="", flush=True)
+
     return ""
 
 
@@ -36,7 +42,7 @@ def _retcode():
 def expand_prompt_fields(prompt_fields):
     prompt_fields["_elapsed"] = _compute_duration
     prompt_fields["_retcode"] = _retcode
-    prompt_fields["_tmux_osc7"] = _tmux_osc7
+    prompt_fields["_osc7"] = _osc7
     return prompt_fields
 
 
@@ -47,7 +53,7 @@ def make_prompt() -> str:
             "{env_name}{BOLD_BLUE}{short_cwd} ",
             "{#5dd8c8}{curr_branch:{} }{RESET}",
             "{_retcode:{} }{BOLD_PURPLE}${prompt_end}{RESET} ",
-            "{_tmux_osc7}",  # OSC 7 at END so it fires last
+            "{_osc7}",  # OSC 7 at END so it fires last
         )
     )
 
