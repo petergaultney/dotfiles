@@ -14,10 +14,10 @@ k9s:
         favorites:
           - peter-gaultney
           - unified-directory
-          - person-api
+          - visits-api
           - tim-blass
           - grant-andersen
           - caleb-gregory
           - ben-cornelis
           - matt-eby
-          - matt-hawthorn
+          - unified-asset

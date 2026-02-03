@@ -234,10 +234,9 @@ def mono(args):
 
 aliases['mon'] = mono
 
-# work machine only
-if Path('~/.gent/init.sh').expanduser().exists():
-    source-bash ~/.gent/init.sh
-    source-bash ~/.gent/wt-completion.bash
+# work machine only - gent worktree management
+if Path('~/.gent/wt.xsh').expanduser().exists():
+    source ~/.gent/wt.xsh
 
 
 def _notify_done(args, stdin=None):
