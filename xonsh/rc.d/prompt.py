@@ -6,7 +6,10 @@ from xonsh.built_ins import XSH
 
 def _osc7():
     """Emit OSC 7 for directory tracking (tmux and WezTerm)."""
-    cwd = os.getcwd()
+    try:
+        cwd = os.getcwd()
+    except OSError:
+        return ""  # directory was deleted
 
     if os.environ.get("TMUX"):
         # tmux needs to write directly to tty
