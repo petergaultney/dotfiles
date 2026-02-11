@@ -278,7 +278,7 @@ aliases['sd'] = _notify_done
 #
 # ALSO: tmux.conf needs: set -as terminal-features 'xterm*:osc7'
 #
-# Full docs: ~/obsidian-personal/14.../14.27.../tmux-xonsh-directory-tracking.md
+# Full docs: ~/trove/14.../14.27.../tmux-xonsh-directory-tracking.md
 #
 if "TMUX" in ${...}:
     @events.on_chdir
