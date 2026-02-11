@@ -89,6 +89,15 @@ def _gd():
 aliases['gd'] = _gd
 
 
+# clawdbot
+
+def _cb():
+    with ${...}.swap(NODE_NO_WARNINGS='1'):
+        clawdbot tui
+
+aliases['cb'] = _cb
+
+
 # Emacs
 
 $EDITOR = 'emacsclient -t'
@@ -260,7 +269,7 @@ def _notify_done(args, stdin=None):
     return rc
 
 aliases['sd'] = _notify_done
-
+aliases['lroc'] = 'lemonaid openclaw register'
 
 # $BASH_COMPLETIONS.insert(0, '/opt/homebrew/etc/profile.d/bash_completion.sh')
 
