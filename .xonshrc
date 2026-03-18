@@ -1,4 +1,4 @@
-# source ~/work/obsidian-work/work/xonshrc.md
+# source ~/work/vault/xonshrc.md
 #
 $XONSH_COLOR_STYLE = 'native'  # better constrast within wezterm at least
 
@@ -40,22 +40,21 @@ $RIPGREP_CONFIG_PATH = os.path.expanduser('~/.config/.ripgreprc')
 # if 'PYENV_VERSION' in ${...}:
 #    del $PYENV_VERSION
 
-if '/opt/homebrew/bin' not in $PATH and os.path.exists('/opt/homebrew/bin'):
-    # arm64 homebrew
-    $PATH.insert(0, '/opt/homebrew/bin')
 
 $HOMEBREW_NO_AUTO_UPDATE = '1'
 
 # $PATH = [pth for pth in $PATH if 'pyenv/versions' not in str(pth)]
 
 _path_dirs = [
+    '/opt/homebrew/bin',
     '~/sw/bin',
     "~/.atuin/bin",
     '~/.local/share/mise/shims',
     '~/.local/bin',
     '~/.cargo/bin',
-    "~/Applications/Docker.app/Contents/Resources/bin",
+    "/Applications/Obsidian.app/Contents/MacOS/",
     '/usr/local/bin',
+    "~/Applications/Docker.app/Contents/Resources/bin",
 ]
 _resolved = [os.path.expanduser(pth) for pth in _path_dirs]
 
