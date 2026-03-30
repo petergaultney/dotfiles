@@ -46,13 +46,13 @@ $HOMEBREW_NO_AUTO_UPDATE = '1'
 # $PATH = [pth for pth in $PATH if 'pyenv/versions' not in str(pth)]
 
 _path_dirs = [
-    '/opt/homebrew/bin',
     '~/sw/bin',
     "~/.atuin/bin",
     '~/.local/share/mise/shims',
     '~/.local/bin',
     '~/.cargo/bin',
     "/Applications/Obsidian.app/Contents/MacOS/",
+    '/opt/homebrew/bin',
     '/usr/local/bin',
     "~/Applications/Docker.app/Contents/Resources/bin",
 ]
