@@ -66,7 +66,9 @@
                             {
                                 "conditions": [
                                     {
-                                        "bundle_identifiers": ["^com\\.googlecode\\.iterm2$"],
+                                        "bundle_identifiers": [
+                                            "^com\\.googlecode\\.iterm2$"
+                                        ],
                                         "type": "frontmost_application_if"
                                     }
                                 ],
@@ -186,7 +188,23 @@
                     ]
                 },
                 {
-                    "disable_built_in_keyboard_if_exists": true,
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "product_id": 0,
+                        "vendor_id": 0
+                    },
+                    "simple_modifications": [
+                        {
+                            "from": { "key_code": "left_command" },
+                            "to": [{ "key_code": "left_control" }]
+                        },
+                        {
+                            "from": { "key_code": "right_command" },
+                            "to": [{ "key_code": "left_control" }]
+                        }
+                    ]
+                },
+                {
                     "identifiers": {
                         "is_keyboard": true,
                         "product_id": 10203,

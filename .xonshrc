@@ -45,10 +45,8 @@ $HOMEBREW_NO_AUTO_UPDATE = '1'
 
 # $PATH = [pth for pth in $PATH if 'pyenv/versions' not in str(pth)]
 
-# These dirs are prepended to xonsh's $PATH. They must also be mirrored in
-# ~/.bashrc, because the xonsh wrapper (xbin/xonsh) runs `bash -i` and
-# subprocess calls (e.g. from gent's init hooks) inherit bash's
-# os.environ['PATH'], not xonsh's $PATH.
+$UPDATE_OS_ENVIRON = True
+
 _path_dirs = [
     '~/sw/bin',
     "~/.atuin/bin",
