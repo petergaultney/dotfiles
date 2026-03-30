@@ -45,8 +45,6 @@ $HOMEBREW_NO_AUTO_UPDATE = '1'
 
 # $PATH = [pth for pth in $PATH if 'pyenv/versions' not in str(pth)]
 
-$UPDATE_OS_ENVIRON = True
-
 _path_dirs = [
     '~/sw/bin',
     "~/.atuin/bin",
@@ -63,6 +61,7 @@ _resolved = [os.path.expanduser(pth) for pth in _path_dirs]
 $PATH = [pth for pth in $PATH if pth not in _resolved]
 for pth in reversed(_resolved):
     $PATH.insert(0, pth)
+os.environ['PATH'] = os.pathsep.join($PATH)
 
 # wezterm
 
