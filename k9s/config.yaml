@@ -7,17 +7,3 @@ k9s:
     tail: 1000
     # Defines the total number of log lines to allow in the view. Default 1000
     buffer: 10000
-  clusters:
-    datascience:
-      namespace:
-        lockFavorites: true
-        favorites:
-          - peter-gaultney
-          - unified-directory
-          - visits-api
-          - tim-blass
-          - grant-andersen
-          - caleb-gregory
-          - ben-cornelis
-          - matt-eby
-          - unified-asset

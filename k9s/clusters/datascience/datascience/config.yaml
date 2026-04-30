@@ -1,20 +1,20 @@
 k9s:
   cluster: datascience
   namespace:
-    active: peter-gaultney
+    active: protostellar
     lockFavorites: true
     favorites:
-    - peter-gaultney
-    - unified-directory
-    - visits-api
-    - tim-blass
-    - grant-andersen
-    - caleb-gregory
-    - ben-cornelis
-    - matt-eby
-    - unified-asset
+      - peter-gaultney
+      - protostellar
+      - unified-directory
+      - visits-api
+      - thds
+      - tim-blass
+      - grant-andersen
+      - ben-cornelis
+      - matt-eby
   view:
-    active: pod
+    active: v1/pods protostellar
   featureGates:
     nodeShell: false
-  portForwardAddress: localhost
+  proxy: null
