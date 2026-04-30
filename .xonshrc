@@ -178,6 +178,8 @@ if "EMACS_VTERM_PATH" in ${...}:
 
 ## END Emacs
 
+aliases['c'] = 'claude --allow-dangerously-skip-permissions'
+
 # Python/venvs
 
 $PIPENV_VENV_IN_PROJECT = '1'
