@@ -178,7 +178,8 @@ if "EMACS_VTERM_PATH" in ${...}:
 
 ## END Emacs
 
-aliases['c'] = 'claude --allow-dangerously-skip-permissions'
+aliases['c'] = 'claude --remote-control --allow-dangerously-skip-permissions --thinking-display summarized'
+aliases['lp'] = 'lemonaid place'  # lp open <key> / lp list / lp toss
 
 # Python/venvs
 
@@ -205,7 +206,6 @@ def run_dmypy():
 
 aliases['mst'] = run_dmypy
 aliases['pst'] = 'uv run pytest tests'
-aliases['slack'] = 'open -a Slack'
 aliases['ohslack'] = 'killall Slack; open -a Slack'
 
 aliases['tailscale'] = "/Applications/Tailscale.app/Contents/MacOS/Tailscale"
