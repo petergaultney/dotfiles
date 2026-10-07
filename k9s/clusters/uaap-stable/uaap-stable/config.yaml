@@ -1,0 +1,14 @@
+k9s:
+  cluster: uaap-stable
+  namespace:
+    active: protostellar
+    lockFavorites: false
+    favorites:
+      - protostellar
+      - default
+      - namespace
+  view:
+    active: v1/pods protostellar
+  featureGates:
+    nodeShell: false
+  proxy: null
