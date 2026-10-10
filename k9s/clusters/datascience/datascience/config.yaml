@@ -1,7 +1,7 @@
 k9s:
   cluster: datascience
   namespace:
-    active: peter-gaultney
+    active: protostellar
     lockFavorites: true
     favorites:
       - peter-gaultney
@@ -14,7 +14,7 @@ k9s:
       - ben-cornelis
       - matt-eby
   view:
-    active: v1/pods
+    active: v1/pods protostellar
   featureGates:
     nodeShell: false
   proxy: null
