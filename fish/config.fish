@@ -6,8 +6,6 @@ set -gx RIPGREP_CONFIG_PATH "$HOME/.config/.ripgreprc"
 set -gx HOMEBREW_NO_AUTO_UPDATE 1
 set -gx EDITOR emacsclient -t
 set -gx PIPENV_VENV_IN_PROJECT 1
-set -gx THDS_CORE_LOG_LEVELS_FILE "$HOME/work/.thds_log_levels.txt"
-set -gx SKIP mono-docker-lock
 
 set -l dotfiles_path_dirs \
     "$HOME/sw/bin" \
@@ -56,12 +54,9 @@ alias ptx 'uv run pytest -n auto --cov --cov-report=html'
 alias vv 'uv run'
 alias us 'uv sync'
 alias vip 'uv run --with ipython ipython'
-alias mi 'uv run mops-inspect'
 alias pst 'uv run pytest tests'
 alias ohslack 'killall Slack; open -a Slack'
 alias tailscale '/Applications/Tailscale.app/Contents/MacOS/Tailscale'
-alias adu 'uv run adls-download-uri'
-alias adu-clip 'uv run adls-download-uri (pbpaste)'
 alias lroc 'lemonaid openclaw register'
 
 function e --description 'Open a file in Emacs or Emacs vterm'
@@ -102,16 +97,16 @@ function fix-emacs
     emacsclient --eval '(abort-recursive-edit)'
 end
 
-function pcr
-    env SKIP=mono-docker-lock pre-commit run $argv
-end
-
-function mst
-    uv run dmypy run --timeout 3600 -- . --config-file pyproject.toml $argv
-end
-
 function ulimit_n
     ulimit -n $argv[1]
+end
+
+function codex --description 'codex without the shared app-server daemon'
+    if contains -- --no-daemon $argv
+        command codex $argv
+    else
+        command codex --no-daemon $argv
+    end
 end
 
 function cd_repo_root
@@ -122,15 +117,6 @@ function cd_repo_root
         echo 'No git repo found'
         return 1
     end
-end
-
-function mon
-    set -l original_dir $PWD
-    cd_repo_root; or return
-    uv run mono $argv
-    set -l result $status
-    cd "$original_dir"
-    return $result
 end
 
 function sd --description 'Run a command and speak its result'
