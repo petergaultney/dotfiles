@@ -1,7 +1,7 @@
 k9s:
   cluster: datascience
   namespace:
-    active: matt-hawthorn
+    active: tim-blass
     lockFavorites: true
     favorites:
       - peter-gaultney
@@ -14,7 +14,7 @@ k9s:
       - ben-cornelis
       - matt-eby
   view:
-    active: v1/pods matt-hawthorn
+    active: v1/pods tim-blass
   featureGates:
     nodeShell: false
   proxy: null
