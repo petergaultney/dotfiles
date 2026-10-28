@@ -14,7 +14,7 @@ k9s:
       - ben-cornelis
       - matt-eby
   view:
-    active: v1/pods tim-blass
+    active: v1/nodes
   featureGates:
     nodeShell: false
   proxy: null
