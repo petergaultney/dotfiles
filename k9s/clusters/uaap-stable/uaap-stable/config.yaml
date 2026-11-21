@@ -8,7 +8,7 @@ k9s:
       - default
       - namespace
   view:
-    active: v1/pods protostellar
+    active: v1/namespaces
   featureGates:
     nodeShell: false
   proxy: null
